@@ -98,13 +98,10 @@ export const graphHasCycles = (graphData: GraphData) => {
   return hasCycles;
 };
 
-export const layoutGraph = (graphData: GraphData) => {
+export const layoutGraph = (graphData: GraphData, margin = 100) => {
   const g = new dagre.graphlib.Graph();
-  const marginBase = 100;
-  const marginy = marginBase;
-  const marginx = marginBase;
 
-  g.setGraph({rankdir: 'TB', marginx, marginy});
+  g.setGraph({rankdir: 'TB', marginx: margin, marginy: margin});
   g.setDefaultEdgeLabel(() => ({}));
 
   Object.values(graphData.nodes)
@@ -153,8 +150,8 @@ export const layoutGraph = (graphData: GraphData) => {
       x: dagreNode.x - dagreNode.width / 2,
       y: dagreNode.y - dagreNode.height / 2,
     });
-    maxWidth = Math.max(maxWidth, dagreNode.x + dagreNode.width);
-    maxHeight = Math.max(maxHeight, dagreNode.y + dagreNode.height);
+    maxWidth = Math.max(maxWidth, dagreNode.x + dagreNode.width / 2);
+    maxHeight = Math.max(maxHeight, dagreNode.y + dagreNode.height / 2);
   });
 
   const edges: IEdge[] = [];
@@ -171,7 +168,7 @@ export const layoutGraph = (graphData: GraphData) => {
     nodes,
     edges,
     width: maxWidth,
-    height: maxHeight + marginBase,
+    height: maxHeight + margin,
   };
 };
 
