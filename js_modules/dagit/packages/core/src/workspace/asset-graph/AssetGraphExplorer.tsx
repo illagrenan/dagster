@@ -12,7 +12,6 @@ import {ExplorerPath} from '../../pipelines/PipelinePathUtils';
 import {SidebarPipelineOrJobOverview} from '../../pipelines/SidebarPipelineOrJobOverview';
 import {GraphExplorerSolidHandleFragment} from '../../pipelines/types/GraphExplorerSolidHandleFragment';
 import {METADATA_ENTRY_FRAGMENT} from '../../runs/MetadataEntry';
-import {ColorsWIP} from '../../ui/Colors';
 import {GraphQueryInput} from '../../ui/GraphQueryInput';
 import {Loading} from '../../ui/Loading';
 import {NonIdealState} from '../../ui/NonIdealState';
@@ -20,13 +19,13 @@ import {SplitPanelContainer} from '../../ui/SplitPanelContainer';
 import {repoAddressToSelector} from '../repoAddressToSelector';
 import {RepoAddress} from '../types';
 
-import {AssetNode, getNodeDimensions} from './AssetNode';
+import {AssetEdges} from './AssetEdges';
+import {AssetNode, ASSET_NODE_FRAGMENT, getNodeDimensions} from './AssetNode';
 import {ForeignNode, getForeignNodeDimensions} from './ForeignNode';
 import {SidebarAssetInfo} from './SidebarAssetInfo';
 import {
   buildGraphComputeStatuses,
   buildGraphData,
-  buildSVGPath,
   GraphData,
   graphHasCycles,
   layoutGraph,
@@ -186,29 +185,8 @@ const AssetGraphExplorerWithData: React.FC<
           >
             {({scale: _scale}: any) => (
               <SVGContainer width={layout.width} height={layout.height}>
-                <defs>
-                  <marker
-                    id="arrow"
-                    viewBox="0 0 8 10"
-                    refX="1"
-                    refY="5"
-                    markerUnits="strokeWidth"
-                    markerWidth="4"
-                    orient="auto"
-                  >
-                    <path d="M 0 0 L 8 5 L 0 10 z" fill={ColorsWIP.Gray600} />
-                  </marker>
-                </defs>
-                <g opacity={0.2}>
-                  {layout.edges.map((edge, idx) => (
-                    <StyledPath
-                      key={idx}
-                      d={buildSVGPath({source: edge.from, target: edge.to})}
-                      dashed={edge.dashed}
-                      markerEnd="url(#arrow)"
-                    />
-                  ))}
-                </g>
+                <AssetEdges edges={layout.edges} />
+
                 {layout.nodes.map((layoutNode) => {
                   const graphNode = graphData.nodes[layoutNode.id];
                   const {width, height} = graphNode.hidden
@@ -301,44 +279,17 @@ const ASSETS_GRAPH_QUERY = gql`
           name
         }
         assetNodes {
+          ...AssetNodeFragment
           id
           assetKey {
             path
           }
-          opName
-          description
-          jobName
           dependencies {
             inputName
-            upstreamAsset {
+            asset {
               id
               assetKey {
                 path
-              }
-            }
-          }
-          assetMaterializations(limit: 1) {
-            ...LatestMaterializationMetadataFragment
-
-            materializationEvent {
-              materialization {
-                metadataEntries {
-                  ...MetadataEntryFragment
-                }
-              }
-              stepStats {
-                stepKey
-                startTime
-                endTime
-              }
-            }
-            runOrError {
-              ... on PipelineRun {
-                id
-                runId
-                status
-                pipelineName
-                mode
               }
             }
           }
@@ -354,6 +305,7 @@ const ASSETS_GRAPH_QUERY = gql`
       }
     }
   }
+  ${ASSET_NODE_FRAGMENT}
   ${METADATA_ENTRY_FRAGMENT}
   ${LATEST_MATERIALIZATION_METADATA_FRAGMENT}
 `;
@@ -361,12 +313,6 @@ const ASSETS_GRAPH_QUERY = gql`
 const SVGContainer = styled.svg`
   overflow: visible;
   border-radius: 0;
-`;
-const StyledPath = styled('path')<{dashed: boolean}>`
-  stroke-width: 4;
-  stroke: ${ColorsWIP.Gray600};
-  ${({dashed}) => (dashed ? `stroke-dasharray: 8 2;` : '')}
-  fill: none;
 `;
 
 const AssetQueryInputContainer = styled.div`

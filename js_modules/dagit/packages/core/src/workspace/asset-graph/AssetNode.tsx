@@ -1,4 +1,4 @@
-import {useMutation} from '@apollo/client';
+import {gql, useMutation} from '@apollo/client';
 import {ContextMenu2 as ContextMenu} from '@blueprintjs/popover2';
 import qs from 'query-string';
 import React, {CSSProperties} from 'react';
@@ -27,10 +27,10 @@ import {RepoAddress} from '../types';
 import {workspacePath} from '../workspacePath';
 
 import {assetKeyToString, Status} from './Utils';
-import {AssetGraphQuery_repositoryOrError_Repository_assetNodes} from './types/AssetGraphQuery';
+import {AssetNodeFragment} from './types/AssetNodeFragment';
 
 export const AssetNode: React.FC<{
-  definition: AssetGraphQuery_repositoryOrError_Repository_assetNodes;
+  definition: AssetNodeFragment;
   handle: GraphExplorerSolidHandleFragment;
   selected: boolean;
   computeStatus: Status;
@@ -187,7 +187,45 @@ export const AssetNode: React.FC<{
   );
 };
 
-export const getNodeDimensions = (def: AssetGraphQuery_repositoryOrError_Repository_assetNodes) => {
+export const ASSET_NODE_FRAGMENT = gql`
+  fragment AssetNodeFragment on AssetNode {
+    id
+    opName
+    description
+    jobName
+    assetKey {
+      path
+    }
+
+    assetMaterializations(limit: 1) {
+      ...LatestMaterializationMetadataFragment
+
+      materializationEvent {
+        materialization {
+          metadataEntries {
+            ...MetadataEntryFragment
+          }
+        }
+        stepStats {
+          stepKey
+          startTime
+          endTime
+        }
+      }
+      runOrError {
+        ... on PipelineRun {
+          id
+          runId
+          status
+          pipelineName
+          mode
+        }
+      }
+    }
+  }
+`;
+
+export const getNodeDimensions = (def: AssetNodeFragment) => {
   let height = 95;
   if (def.description) {
     height += 25;
