@@ -103,6 +103,7 @@ export const layoutGraph = (graphData: GraphData) => {
   const marginBase = 100;
   const marginy = marginBase;
   const marginx = marginBase;
+
   g.setGraph({rankdir: 'TB', marginx, marginy});
   g.setDefaultEdgeLabel(() => ({}));
 

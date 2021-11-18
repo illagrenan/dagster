@@ -188,7 +188,7 @@ export const AssetNode: React.FC<{
 };
 
 export const getNodeDimensions = (def: AssetGraphQuery_repositoryOrError_Repository_assetNodes) => {
-  let height = 92 + 20;
+  let height = 95;
   if (def.description) {
     height += 25;
   }

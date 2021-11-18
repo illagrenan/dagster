@@ -189,15 +189,14 @@ const AssetGraphExplorerWithData: React.FC<
                 <defs>
                   <marker
                     id="arrow"
-                    viewBox="0 0 10 10"
+                    viewBox="0 0 8 10"
                     refX="1"
                     refY="5"
                     markerUnits="strokeWidth"
-                    markerWidth="2"
-                    markerHeight="4"
+                    markerWidth="4"
                     orient="auto"
                   >
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill={ColorsWIP.Gray200} />
+                    <path d="M 0 0 L 8 5 L 0 10 z" fill={ColorsWIP.Gray600} />
                   </marker>
                 </defs>
                 <g opacity={0.2}>
@@ -223,6 +222,7 @@ const AssetGraphExplorerWithData: React.FC<
                       width={width}
                       height={height}
                       onClick={(e) => onSelectNode(e, graphNode)}
+                      style={{overflow: 'visible'}}
                     >
                       {graphNode.hidden ? (
                         <ForeignNode assetKey={graphNode.assetKey} />
