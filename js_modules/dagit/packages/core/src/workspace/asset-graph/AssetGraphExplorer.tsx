@@ -154,6 +154,7 @@ const AssetGraphExplorerWithData: React.FC<
     [explorerPath.opsQuery, handles],
   );
 
+  console.log(graphData);
   const layout = layoutGraph(graphData);
   const computeStatuses = buildGraphComputeStatuses(graphData);
 
@@ -207,7 +208,10 @@ const AssetGraphExplorerWithData: React.FC<
                       ) : (
                         <AssetNode
                           definition={graphNode.definition}
-                          handle={handles.find((h) => h.handleID === graphNode.definition.opName)!}
+                          metadata={
+                            handles.find((h) => h.handleID === graphNode.definition.opName)!.solid
+                              .definition.metadata
+                          }
                           selected={selectedGraphNode === graphNode}
                           computeStatus={computeStatuses[graphNode.id]}
                           repoAddress={repoAddress}
@@ -236,6 +240,7 @@ const AssetGraphExplorerWithData: React.FC<
             />
             <LaunchRootExecutionButton
               pipelineName={explorerPath.pipelineName}
+              disabled={!explorerPath.opsQuery || highlighted.length === 0}
               getVariables={() => ({
                 executionParams: {
                   mode: 'default',
@@ -248,7 +253,6 @@ const AssetGraphExplorerWithData: React.FC<
                   },
                 },
               })}
-              disabled={!explorerPath.opsQuery || highlighted.length === 0}
             />
           </AssetQueryInputContainer>
         </>

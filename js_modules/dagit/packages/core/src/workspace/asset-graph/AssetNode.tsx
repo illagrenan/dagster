@@ -8,7 +8,6 @@ import styled from 'styled-components/macro';
 import {AppContext} from '../../app/AppContext';
 import {showLaunchError} from '../../execute/showLaunchError';
 import {OpTags} from '../../graph/OpTags';
-import {GraphExplorerSolidHandleFragment} from '../../pipelines/types/GraphExplorerSolidHandleFragment';
 import {
   LAUNCH_PIPELINE_EXECUTION_MUTATION,
   handleLaunchResult,
@@ -31,18 +30,18 @@ import {AssetNodeFragment} from './types/AssetNodeFragment';
 
 export const AssetNode: React.FC<{
   definition: AssetNodeFragment;
-  handle: GraphExplorerSolidHandleFragment;
+  metadata: {key: string; value: string}[];
   selected: boolean;
   computeStatus: Status;
   repoAddress: RepoAddress;
   secondaryHighlight: boolean;
-}> = ({definition, handle, selected, computeStatus, repoAddress, secondaryHighlight}) => {
+}> = ({definition, metadata, selected, computeStatus, repoAddress, secondaryHighlight}) => {
   const [launchPipelineExecution] = useMutation<LaunchPipelineExecution>(
     LAUNCH_PIPELINE_EXECUTION_MUTATION,
   );
   const {basePath} = React.useContext(AppContext);
   const {materializationEvent: event, runOrError} = definition.assetMaterializations[0] || {};
-  const kind = handle.solid.definition.metadata.find((m) => m.key === 'kind')?.value;
+  const kind = metadata.find((m) => m.key === 'kind')?.value;
 
   const onLaunch = async () => {
     if (!definition.jobName) {

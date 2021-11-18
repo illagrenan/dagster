@@ -12,13 +12,49 @@ import {
   getNodeDimensions,
 } from '../workspace/asset-graph/AssetNode';
 import {getForeignNodeDimensions, ForeignNode} from '../workspace/asset-graph/ForeignNode';
-import {layoutGraph, buildGraphComputeStatuses} from '../workspace/asset-graph/Utils';
+import {layoutGraph, buildGraphComputeStatuses, GraphData} from '../workspace/asset-graph/Utils';
 
 import {AssetNodeDefinitionFragment} from './types/AssetNodeDefinitionFragment';
 
 export const AssetNodeDefinition: React.FC<{assetNode: AssetNodeDefinitionFragment}> = ({
   assetNode,
 }) => {
+  const graphData: GraphData = {
+    downstream: {
+      [assetNode.id]: {},
+    },
+    nodes: {
+      [assetNode.id]: {
+        id: assetNode.id,
+        assetKey: assetNode.assetKey,
+        definition: {...assetNode, dependencies: []},
+        hidden: false,
+      },
+    },
+    upstream: {
+      [assetNode.id]: {},
+    },
+  };
+
+  for (const {asset} of assetNode.dependencies) {
+    graphData.upstream[assetNode.id][asset.id] = true;
+    graphData.nodes[asset.id] = {
+      id: asset.id,
+      assetKey: asset.assetKey,
+      definition: {...asset, dependencies: []},
+      hidden: false,
+    };
+  }
+  for (const {asset} of assetNode.dependedBy) {
+    graphData.downstream[assetNode.id][asset.id] = 'a';
+    graphData.nodes[asset.id] = {
+      id: asset.id,
+      assetKey: asset.assetKey,
+      definition: {...asset, dependencies: []},
+      hidden: false,
+    };
+  }
+  console.log(graphData);
   const layout = layoutGraph(graphData);
   const computeStatuses = buildGraphComputeStatuses(graphData);
 
@@ -27,7 +63,7 @@ export const AssetNodeDefinition: React.FC<{assetNode: AssetNodeDefinitionFragme
       <div style={{paddingTop: 16, paddingLeft: 24}}>
         <Description description={assetNode.description} />
       </div>
-      <div>
+      <div style={{flex: 1}}>
         <SVGViewport
           interactor={SVGViewport.Interactors.PanAndZoom}
           graphWidth={layout.width}
@@ -52,7 +88,7 @@ export const AssetNodeDefinition: React.FC<{assetNode: AssetNodeDefinitionFragme
                     y={layoutNode.y}
                     width={width}
                     height={height}
-                    onClick={(e) => onSelectNode(e, graphNode)}
+                    onClick={(e) => {}}
                     style={{overflow: 'visible'}}
                   >
                     {graphNode.hidden ? (
@@ -60,17 +96,14 @@ export const AssetNodeDefinition: React.FC<{assetNode: AssetNodeDefinitionFragme
                     ) : (
                       <AssetNode
                         definition={graphNode.definition}
-                        handle={handles.find((h) => h.handleID === graphNode.definition.opName)!}
-                        selected={selectedGraphNode === graphNode}
+                        metadata={[]}
+                        selected={false}
                         computeStatus={computeStatuses[graphNode.id]}
-                        repoAddress={repoAddress}
-                        secondaryHighlight={
-                          explorerPath.opsQuery
-                            ? highlighted.some(
-                                (h) => h.definition.name === graphNode.definition.opName,
-                              )
-                            : false
-                        }
+                        secondaryHighlight={false}
+                        repoAddress={{
+                          name: 'a',
+                          location: 'a',
+                        }}
                       />
                     )}
                   </foreignObject>
