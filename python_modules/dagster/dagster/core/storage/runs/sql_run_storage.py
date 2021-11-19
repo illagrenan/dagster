@@ -54,6 +54,9 @@ class SnapshotType(Enum):
 class SqlRunStorage(RunStorage):  # pylint: disable=no-init
     """Base class for SQL based run storages"""
 
+    def __init__(self):
+        self._snapshot_cache = LRUCache(capacity=32)
+
     @abstractmethod
     def connect(self):
         """Context manager yielding a sqlalchemy.engine.Connection."""
@@ -66,7 +69,7 @@ class SqlRunStorage(RunStorage):  # pylint: disable=no-init
 
     @property
     def snapshot_cache(self) -> Optional[LRUCache]:
-        return None
+        return self._snapshot_cache
 
     def fetchall(self, query):
         with self.connect() as conn:
